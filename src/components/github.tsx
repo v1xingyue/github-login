@@ -5,7 +5,7 @@ export const GithubLogin = () => {
   const params = new URLSearchParams({
     client_id: process.env.client_id as string,
     scope: ["read:user", "user:email"].join(" "),
-    redirect_uri: "http://localhost:3000/",
+    redirect_uri: location.origin + "/",
     allow_signup: "true",
   });
 
