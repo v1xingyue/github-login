@@ -2,16 +2,19 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 export const GithubLogin = () => {
-  const params = new URLSearchParams({
-    client_id: process.env.client_id as string,
-    scope: ["read:user", "user:email"].join(" "),
-    redirect_uri: location.origin + "/",
-    allow_signup: "true",
-  });
+  const [loginUrl, setLoginUrl] = useState<string>("");
+  useEffect(() => {
+    const params = new URLSearchParams({
+      client_id: process.env.client_id as string,
+      scope: ["read:user", "user:email"].join(" "),
+      redirect_uri: location.origin + "/",
+      allow_signup: "true",
+    });
+    const githubLoginUrl = `https://github.com/login/oauth/authorize?${params}`;
+    setLoginUrl(githubLoginUrl);
+  }, []);
 
-  const githubLoginUrl = `https://github.com/login/oauth/authorize?${params}`;
-
-  return <a href={githubLoginUrl}>Login with Github</a>;
+  return <a href={loginUrl}>Login with Github</a>;
 };
 
 export const GithubCallback = () => {
