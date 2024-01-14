@@ -21,3 +21,13 @@ body {
 body div {
   margin:0.5rem;
 }
+
+a {
+  color: blue;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

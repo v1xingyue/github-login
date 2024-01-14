@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import * as queryString from "query-string";
 
+import sign from "jwt-encode";
+
 const fetchAccessToken = async (code: string) => {
   const res = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
@@ -9,7 +11,7 @@ const fetchAccessToken = async (code: string) => {
     },
     body: JSON.stringify({
       code,
-      client_id: process.env.client_id,
+      client_id: process.env.NEXT_PUBLIC_CLIENT_ID,
       client_secret: process.env.client_secret,
     }),
   });
@@ -35,19 +37,26 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { code } = req.body;
+  const { code, state } = req.body;
   const { access_token } = await fetchAccessToken(code);
   if (access_token != null) {
     const userInfo = await getUserInfo(access_token as string);
-
-    res.json({
-      parmas: req.query,
-      code,
-      access_token,
-      userInfo,
-      now: new Date().toISOString(),
-      status: 0,
-    });
+    const JwtToken = sign(
+      {
+        iss: "https://github.com",
+        azp: `${process.env.NEXT_PUBLIC_CLIENT_ID}`,
+        aud: `${process.env.NEXT_PUBLIC_CLIENT_ID}`,
+        sub: userInfo.id + "",
+        email: userInfo.email,
+        nonce: state,
+        nbf: 1705042749,
+        iat: 1705043049,
+        exp: 1705046649,
+        jti: "jwt_token_uniq_id",
+      },
+      access_token as string
+    );
+    res.json({ ...userInfo, JwtToken });
   } else {
     res.json({
       error: "code is null or expired.",
